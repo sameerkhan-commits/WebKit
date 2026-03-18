@@ -1,7 +1,7 @@
 <?php
 
 define('MEGABYTES', 1024 * 1024);
-define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9][A-Za-z0-9.+-]*\/[A-Za-z0-9][A-Za-z0-9.+-]*$/');
+define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9][A-Za-z0-9+-]*(\.[A-Za-z0-9+-]+)*\/[A-Za-z0-9][A-Za-z0-9+-]*(\.[A-Za-z0-9+-]+)*$/');
 define('PATHINFO_PREFIX_FOR_UPLOADS', 'file');
 
 function sanitize_mime_type($mime_type)
@@ -25,7 +25,7 @@ function assert_supported_file_type($file_extension)
         return;
 
     $disallowed_extensions = array(
-        '.php', '.phtml', '.php3', '.php4', '.php5', '.php7', '.phar',
+        '.php', '.phtml', '.php3', '.php4', '.php5', '.php7', '.php8', '.phar',
         '.pl', '.pm', '.py', '.rb', '.cgi', '.jsp', '.asp', '.aspx',
         '.sh', '.bash', '.csh', '.ksh', '.zsh', '.bat', '.cmd', '.com', '.exe', '.dll', '.so', '.dylib',
         '.ps1', '.psm1', '.vb', '.vbs', '.hta', '.jar'
