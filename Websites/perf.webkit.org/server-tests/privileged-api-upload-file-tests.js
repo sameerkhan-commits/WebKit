@@ -8,7 +8,7 @@ global.FormData = require('form-data');
 const MockData = require('./resources/mock-data.js');
 const TestServer = require('./resources/test-server.js');
 const TemporaryFile = require('./resources/temporary-file.js').TemporaryFile;
-const prepareServerTest = require('./resources/common-operations.js').prepareServerTest;
+const {prepareServerTest, assertThrows} = require('./resources/common-operations.js');
 
 describe('/privileged-api/upload-file', function () {
     prepareServerTest(this);
@@ -39,6 +39,11 @@ describe('/privileged-api/upload-file', function () {
                 assert.strictEqual(error, 'FileSizeLimitExceeded');
             });
         });
+    });
+
+    it('should reject uploads with dangerous file extensions', async () => {
+        const stream = await TemporaryFile.makeTemporaryFile('malicious.php', '<?php echo "evil"; ?>');
+        await assertThrows('UnsupportedFileType', () => PrivilegedAPI.sendRequest('upload-file', {newFile: stream}, {useFormData: true}));
     });
 
     it('should upload a file when the filesize is smaller than the limit', () => {

@@ -1,6 +1,46 @@
 <?php
 
 define('MEGABYTES', 1024 * 1024);
+define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9][A-Za-z0-9.-]*(\+[A-Za-z0-9.-]+)?\/[A-Za-z0-9][A-Za-z0-9.-]*(\+[A-Za-z0-9.-]+)?$/');
+define('PATHINFO_PREFIX_FOR_UPLOADS', 'file');
+// Block known executable and script extensions to prevent uploaded artifacts from being interpreted as active content on the server.
+define('DISALLOWED_UPLOAD_EXTENSIONS', array(
+    '.php', '.phtml', '.php3', '.php4', '.php5', '.php6', '.php7', '.php8', '.phar',
+    '.pl', '.pm', '.py', '.rb', '.cgi', '.jsp', '.asp', '.aspx',
+    '.sh', '.bash', '.csh', '.ksh', '.zsh', '.bat', '.cmd', '.com', '.exe', '.dll', '.so', '.dylib',
+    '.ps1', '.psm1', '.vb', '.vbs', '.hta', '.jar'
+));
+
+function sanitize_mime_type($mime_type)
+{
+    if (!$mime_type)
+        return 'application/octet-stream';
+    $trimmed_type = trim($mime_type);
+    if (!preg_match(VALID_MIME_TYPE_PATTERN, $trimmed_type))
+        return 'application/octet-stream';
+    return $trimmed_type;
+}
+
+function assert_supported_file_type($file_extension)
+{
+    if (!$file_extension)
+        return;
+
+    $normalized_extension = strtolower($file_extension);
+    $trimmed_extension = trim($normalized_extension);
+    if ($trimmed_extension === '')
+        return;
+
+    // Prefix with a constant string so pathinfo can extract the final extension reliably even when the original name starts with a dot.
+    $extension_segments = explode('.', $trimmed_extension);
+    foreach ($extension_segments as $segment) {
+        if (!$segment)
+            continue;
+        $segment_with_dot = '.' . $segment;
+        if (in_array($segment_with_dot, DISALLOWED_UPLOAD_EXTENSIONS, true))
+            exit_with_error('UnsupportedFileType', array('extension' => $file_extension));
+    }
+}
 
 function format_uploaded_file($file_row)
 {
@@ -77,11 +117,13 @@ function create_uploaded_file_from_form_data($input_file, $remote_user)
         assert(strlen($file_extension) <= 16);
     }
 
+    assert_supported_file_type($file_extension);
+
     return array(
         'author' => $remote_user,
         'filename' => $input_file['name'],
         'extension' => $file_extension,
-        'mime' => $input_file['type'], // Sanitize MIME types.
+        'mime' => sanitize_mime_type(array_get($input_file, 'type')),
         'size' => $input_file['size'],
         'sha256' => $file_sha256
     );
