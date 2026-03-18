@@ -15,7 +15,7 @@ function sanitize_mime_type($mime_type)
 
 function assert_supported_file_type($file_extension)
 {
-    if (!$file_extension)
+    if (!$file_extension || !strlen(trim($file_extension)))
         return;
 
     $disallowed_extensions = array(
@@ -26,8 +26,7 @@ function assert_supported_file_type($file_extension)
     );
 
     $normalized_extension = strtolower($file_extension);
-    $extension_parts = explode('.', ltrim($normalized_extension, '.'));
-    $last_extension = end($extension_parts);
+    $last_extension = pathinfo('dummy' . $normalized_extension, PATHINFO_EXTENSION);
     $last_extension_with_dot = $last_extension ? '.' . $last_extension : null;
     foreach ($disallowed_extensions as $disallowed) {
         if ($last_extension_with_dot === $disallowed)
