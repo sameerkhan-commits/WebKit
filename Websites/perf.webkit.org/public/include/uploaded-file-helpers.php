@@ -3,6 +3,7 @@
 define('MEGABYTES', 1024 * 1024);
 define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9][A-Za-z0-9.-]*(\+[A-Za-z0-9.-]+)?\/[A-Za-z0-9][A-Za-z0-9.-]*(\+[A-Za-z0-9.-]+)?$/');
 define('PATHINFO_PREFIX_FOR_UPLOADS', 'file');
+// Block known executable and script extensions to prevent uploaded artifacts from being interpreted as active content on the server.
 define('DISALLOWED_UPLOAD_EXTENSIONS', array(
     '.php', '.phtml', '.php3', '.php4', '.php5', '.php6', '.php7', '.php8', '.phar',
     '.pl', '.pm', '.py', '.rb', '.cgi', '.jsp', '.asp', '.aspx',
@@ -31,10 +32,12 @@ function assert_supported_file_type($file_extension)
         return;
 
     // Prefix with a constant string so pathinfo can extract the final extension reliably even when the original name starts with a dot.
-    $last_extension = pathinfo(PATHINFO_PREFIX_FOR_UPLOADS . $trimmed_extension, PATHINFO_EXTENSION);
-    $last_extension_with_dot = $last_extension ? '.' . $last_extension : null;
-    foreach (DISALLOWED_UPLOAD_EXTENSIONS as $disallowed) {
-        if ($last_extension_with_dot === $disallowed)
+    $extension_segments = explode('.', $trimmed_extension);
+    foreach ($extension_segments as $segment) {
+        if (!$segment)
+            continue;
+        $segment_with_dot = '.' . $segment;
+        if (in_array($segment_with_dot, DISALLOWED_UPLOAD_EXTENSIONS, true))
             exit_with_error('UnsupportedFileType', array('extension' => $file_extension));
     }
 }
