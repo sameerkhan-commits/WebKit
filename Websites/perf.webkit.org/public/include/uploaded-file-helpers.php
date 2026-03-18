@@ -1,7 +1,7 @@
 <?php
 
 define('MEGABYTES', 1024 * 1024);
-define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9._+-]+\/[A-Za-z0-9._+-]+$/');
+define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9][A-Za-z0-9.+-]*\/[A-Za-z0-9][A-Za-z0-9.+-]*$/');
 
 function sanitize_mime_type($mime_type)
 {
@@ -15,7 +15,12 @@ function sanitize_mime_type($mime_type)
 
 function assert_supported_file_type($file_extension)
 {
-    if (!$file_extension || !strlen(trim($file_extension)))
+    if (!$file_extension)
+        return;
+
+    $normalized_extension = strtolower($file_extension);
+    $trimmed_extension = trim($normalized_extension);
+    if ($trimmed_extension === '')
         return;
 
     $disallowed_extensions = array(
@@ -25,8 +30,8 @@ function assert_supported_file_type($file_extension)
         '.ps1', '.psm1', '.vb', '.vbs', '.hta', '.jar'
     );
 
-    $normalized_extension = strtolower($file_extension);
-    $last_extension = pathinfo('dummy' . $normalized_extension, PATHINFO_EXTENSION);
+    // Prefix with a constant string so pathinfo can extract the final extension reliably even when the original name starts with a dot.
+    $last_extension = pathinfo('file' . $trimmed_extension, PATHINFO_EXTENSION);
     $last_extension_with_dot = $last_extension ? '.' . $last_extension : null;
     foreach ($disallowed_extensions as $disallowed) {
         if ($last_extension_with_dot === $disallowed)
