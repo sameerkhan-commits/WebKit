@@ -2,6 +2,7 @@
 
 define('MEGABYTES', 1024 * 1024);
 define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9][A-Za-z0-9.+-]*\/[A-Za-z0-9][A-Za-z0-9.+-]*$/');
+define('PATHINFO_PREFIX_FOR_UPLOADS', 'file');
 
 function sanitize_mime_type($mime_type)
 {
@@ -31,7 +32,7 @@ function assert_supported_file_type($file_extension)
     );
 
     // Prefix with a constant string so pathinfo can extract the final extension reliably even when the original name starts with a dot.
-    $last_extension = pathinfo('file' . $trimmed_extension, PATHINFO_EXTENSION);
+    $last_extension = pathinfo(PATHINFO_PREFIX_FOR_UPLOADS . $trimmed_extension, PATHINFO_EXTENSION);
     $last_extension_with_dot = $last_extension ? '.' . $last_extension : null;
     foreach ($disallowed_extensions as $disallowed) {
         if ($last_extension_with_dot === $disallowed)
