@@ -1,7 +1,7 @@
 <?php
 
 define('MEGABYTES', 1024 * 1024);
-define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9!#\$&^_.+-]+\/[A-Za-z0-9!#\$&^_.+-]+$/');
+define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9._+-]+\/[A-Za-z0-9._+-]+$/');
 
 function sanitize_mime_type($mime_type)
 {
@@ -22,12 +22,15 @@ function assert_supported_file_type($file_extension)
         '.php', '.phtml', '.php3', '.php4', '.php5', '.php7', '.phar',
         '.pl', '.pm', '.py', '.rb', '.cgi', '.jsp', '.asp', '.aspx',
         '.sh', '.bash', '.csh', '.ksh', '.zsh', '.bat', '.cmd', '.com', '.exe', '.dll', '.so', '.dylib',
-        '.ps1', '.psm1', '.vb', '.vbs', '.hta', '.jar', '.js'
+        '.ps1', '.psm1', '.vb', '.vbs', '.hta', '.jar'
     );
 
     $normalized_extension = strtolower($file_extension);
+    $extension_parts = explode('.', ltrim($normalized_extension, '.'));
+    $last_extension = end($extension_parts);
+    $last_extension_with_dot = $last_extension ? '.' . $last_extension : null;
     foreach ($disallowed_extensions as $disallowed) {
-        if (strlen($normalized_extension) >= strlen($disallowed) && substr($normalized_extension, -strlen($disallowed)) === $disallowed)
+        if ($last_extension_with_dot === $disallowed)
             exit_with_error('UnsupportedFileType', array('extension' => $file_extension));
     }
 }
