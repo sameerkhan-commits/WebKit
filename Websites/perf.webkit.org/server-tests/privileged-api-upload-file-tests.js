@@ -42,7 +42,7 @@ describe('/privileged-api/upload-file', function () {
     });
 
     it('should reject uploads with dangerous file extensions', async () => {
-        const stream = await TemporaryFile.makeTemporaryFile('malicious.php', '<?php echo ' + "'evil';" + ' ?>');
+        const stream = await TemporaryFile.makeTemporaryFile('malicious.php', '<?php echo "evil"; ?>');
         await assertThrows('UnsupportedFileType', () => PrivilegedAPI.sendRequest('upload-file', {newFile: stream}, {useFormData: true}));
     });
 

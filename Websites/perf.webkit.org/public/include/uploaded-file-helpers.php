@@ -1,13 +1,14 @@
 <?php
 
 define('MEGABYTES', 1024 * 1024);
+define('VALID_MIME_TYPE_PATTERN', '/^[A-Za-z0-9!#\$&^_.+-]+\/[A-Za-z0-9!#\$&^_.+-]+$/');
 
 function sanitize_mime_type($mime_type)
 {
     if (!$mime_type)
         return 'application/octet-stream';
     $trimmed_type = trim($mime_type);
-    if (!preg_match('/^[A-Za-z0-9!#\$&^_.+-]+\/[A-Za-z0-9!#\$&^_.+-]+$/', $trimmed_type))
+    if (!preg_match(VALID_MIME_TYPE_PATTERN, $trimmed_type))
         return 'application/octet-stream';
     return $trimmed_type;
 }

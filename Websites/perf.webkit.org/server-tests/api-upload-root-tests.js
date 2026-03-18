@@ -136,7 +136,7 @@ describe('/api/upload-root/', function () {
     it('should reject root uploads with dangerous file extensions', async () => {
         const workerInfo = makeReport();
         await addWorkerForReport(workerInfo);
-        const maliciousFile = await TemporaryFile.makeTemporaryFile('malicious.php', '<?php echo ' + "'evil';" + ' ?>');
+        const maliciousFile = await TemporaryFile.makeTemporaryFile('malicious.php', '<?php echo "evil"; ?>');
         const response = await TestServer.remoteAPI().postFormData('/api/upload-root/', makeReport(maliciousFile));
         assert.strictEqual(response['status'], 'UnsupportedFileType');
     });
